@@ -1,0 +1,230 @@
+#!perl
+use 5.34.0;
+use warnings;
+use experimental 'signatures';
+
+use Dist::Zilla::App;
+use Mojo::File;
+use Mojo::Loader;
+use Mojo::Template;
+use Time::Piece ();
+
+sub capture (@cmd) { qx/@cmd/ =~ s/\n\z//r }
+
+my $module = shift;
+die "Usage: $0 MODULE\n" if !$module or $module =~ /^(-h|--help)$/n;
+$module =~ s/(::|-)/::/g;
+my $dist = $module =~ s/::/-/gr;
+my $author = capture qw(git config --get user.name);
+my $email = capture qw(git config --get user.email);
+my $github_user = capture qw(git config --get github.user) or die "missing 'git config --get github.user'\n";
+my $year = Time::Piece->new->year;
+
+my %ARGV = (module => $module, dist => $dist, author => $author, email => $email, year => $year);
+my $DATA = Mojo::Loader::data_section __PACKAGE__;
+my $TMPL = Mojo::Template->new(vars => 1);
+
+sub render ($source, $target) {
+    my $file = Mojo::File->new($target);
+    $file->dirname->make_path if !-d $file->dirname;
+    $file->spurt($TMPL->render($DATA->{$source}, \%ARGV));
+}
+
+my $dir = Mojo::File->new($dist);
+die "Already exist $dir\n" if -e $dir;
+
+warn "Creating ./$dir\n";
+$dir->make_path;
+
+my @part = split /-/, $dist;
+my $libfile = Mojo::File->new("lib", @part[0 .. ($#part - 1)], $part[-1] . ".pm");
+
+chdir $dir;
+
+render "Module.pm" => $libfile;
+render ".github/workflows/linux.yml" => ".github/workflows/linux.yml";
+render ".github/workflows/windows.yml" => ".github/workflows/windows.yml";
+render ".gitignore" => ".gitignore";
+render "Changes" => "Changes";
+render "cpm.yml" => "cpm.yml";
+render "dist.ini" => "dist.ini";
+render "t/00_use.t" => "t/00_use.t";
+
+system "git", "init", "-q", ".";
+system "git", "add", ".";
+system "git", "remote", "add", "origin", "ssh://git\@github.com/$github_user/$dist.git";
+{ local @ARGV = ("build", "--no-tgz"); Dist::Zilla::App->new->run }
+system "git", "add", ".";
+system "git", "clean", "-xfd";
+
+__DATA__
+
+@@ Changes
+Revision history for <%= $dist %>
+
+{{$NEXT}}
+  - Initial version
+
+@@ t/00_use.t
+use strict;
+use warnings;
+use Test::More tests => 1;
+use <%= $module %>;
+pass "happy hacking!";
+
+@@ .gitignore
+/<%= $dist %>-*
+/.build/
+
+@@ cpm.yml
+prereqs:
+  runtime:
+    requires:
+      perl: { version: '5.008001' }
+
+@@ .github/workflows/linux.yml
+name: linux
+
+on:
+  push:
+    branches:
+      - '*'
+    tags-ignore:
+      - '*'
+  pull_request:
+
+jobs:
+  perl:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        perl-version:
+          - '5.8-buster'
+          - 'latest'
+
+    container:
+      image: perl:${{ matrix.perl-version }}
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: perl -V
+        run: perl -V
+      - name: Install Dependencies
+        run: curl -fsSL --compressed https://git.io/cpm | perl - install -g --with-develop --with-recommends --show-build-log-on-failure
+      - name: Run Tests
+        run: prove -l t
+
+@@ .github/workflows/windows.yml
+name: windows
+
+on:
+  push:
+    branches:
+      - '*'
+    tags-ignore:
+      - '*'
+  pull_request:
+
+jobs:
+  perl:
+
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: perl -V
+        run: perl -V
+      - name: Install Dependencies
+        run: curl -fsSL https://git.io/cpm | perl - install -g --with-develop --with-recommends --show-build-log-on-failure
+      - name: Run Tests
+        run: prove -l t
+
+@@ dist.ini
+name = <%= $dist %>
+license = Perl_5
+
+[ConfirmRelease]
+[CopyFilesFromBuild]
+copy = META.json
+copy = LICENSE
+[CopyFilesFromRelease]
+match = \.pm$
+[Git::Check]
+allow_dirty = Changes
+allow_dirty = META.json
+[Git::Contributors]
+[Git::GatherDir]
+exclude_filename = META.json
+exclude_filename = LICENSE
+[GithubMeta]
+issues = 1
+[License]
+[MetaJSON]
+[MetaProvides::Package]
+inherit_version = 0
+inherit_missing = 0
+[ModuleBuildTiny]
+[Prereqs::From::cpmfile]
+[PruneFiles]
+filename = dist.ini
+filename = cpm.yml
+[ReadmeAnyFromPod]
+type = markdown
+filename = README.md
+location = root
+[ReversionOnRelease]
+prompt = 1
+[StaticInstall]
+[TestRelease]
+[VersionFromMainModule]
+
+[NextRelease]
+format = %v  %{yyyy-MM-dd HH:mm:ss VVV}d%{ (TRIAL RELEASE)}T
+[CheckChangesHasContent]
+[UploadToCPAN]
+;[FakeRelease]
+[Git::Commit]
+commit_msg = %v
+allow_dirty = Changes
+allow_dirty = META.json
+allow_dirty_match = \.pm$
+[Git::Tag]
+tag_format = %v
+tag_message =
+[Git::Push]
+
+@@ Module.pm
+package <%= $module %>;
+use strict;
+use warnings;
+
+our $VERSION = '0.001';
+
+
+1;
+<%# %>__END__
+
+=encoding utf-8
+
+=head1 NAME
+
+<%= $module %> - blah blah blah
+
+=head1 SYNOPSIS
+
+  use <%= $module %>;
+
+=head1 DESCRIPTION
+
+<%= $module %> is
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright <%= $year %> <%= $author %> <<%= $email %>>
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=cut
