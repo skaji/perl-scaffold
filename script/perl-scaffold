@@ -42,8 +42,7 @@ my $libfile = Mojo::File->new("lib", @part[0 .. ($#part - 1)], $part[-1] . ".pm"
 chdir $dir;
 
 render "Module.pm" => $libfile;
-render ".github/workflows/linux.yml" => ".github/workflows/linux.yml";
-render ".github/workflows/windows.yml" => ".github/workflows/windows.yml";
+render ".github/workflows/test.yml" => ".github/workflows/test.yml";
 render ".gitignore" => ".gitignore";
 render "Changes" => "Changes";
 render "cpm.yml" => "cpm.yml";
@@ -82,8 +81,8 @@ prereqs:
     requires:
       perl: { version: '5.008001' }
 
-@@ .github/workflows/linux.yml
-name: linux
+@@ .github/workflows/test.yml
+name: test
 
 on:
   push:
@@ -94,52 +93,29 @@ on:
   pull_request:
 
 jobs:
-  perl:
-
+  linux:
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
         perl-version:
           - '5.8-buster'
           - 'latest'
-
     container:
       image: perl:${{ matrix.perl-version }}
-
     steps:
       - uses: actions/checkout@v2
-      - name: perl -V
-        run: perl -V
+      - run: perl -V
       - name: Install Dependencies
         run: curl -fsSL --compressed https://git.io/cpm | perl - install -g --with-develop --with-recommends --show-build-log-on-failure
-      - name: Run Tests
-        run: prove -l t
-
-@@ .github/workflows/windows.yml
-name: windows
-
-on:
-  push:
-    branches:
-      - '*'
-    tags-ignore:
-      - '*'
-  pull_request:
-
-jobs:
-  perl:
-
+      - run: prove -l t
+  windows:
     runs-on: windows-latest
-
     steps:
       - uses: actions/checkout@v2
-      - name: perl -V
-        run: perl -V
+      - run: perl -V
       - name: Install Dependencies
         run: curl -fsSL https://git.io/cpm | perl - install -g --with-develop --with-recommends --show-build-log-on-failure
-      - name: Run Tests
-        run: prove -l t
+      - run: prove -l t
 
 @@ dist.ini
 name = <%= $dist %>
