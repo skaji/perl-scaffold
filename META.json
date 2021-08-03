@@ -9,6 +9,7 @@
   "prereqs": {
     "runtime": {
       "requires": {
+        "Archive::Tar::Wrapper": "0.38",
         "Dist::Zilla": "6.023",
         "Dist::Zilla::Plugin::CheckChangesHasContent": 0,
         "Dist::Zilla::Plugin::CopyFilesFromBuild": 0,
