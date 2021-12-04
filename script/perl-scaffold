@@ -37,7 +37,8 @@ warn "Creating ./$dir\n";
 $dir->make_path;
 
 my @part = split /-/, $dist;
-my $libfile = Mojo::File->new("lib", @part[0 .. ($#part - 1)], $part[-1] . ".pm");
+my $last = pop @part;
+my $libfile = Mojo::File->new("lib", @part, "$last.pm");
 
 chdir $dir;
 
@@ -119,7 +120,6 @@ jobs:
 
 @@ dist.ini
 name = <%= $dist %>
-license = Perl_5
 
 [ConfirmRelease]
 [CopyFilesFromBuild]
@@ -137,6 +137,7 @@ exclude_filename = LICENSE
 [GithubMeta]
 issues = 1
 [License]
+[LicenseFromModule]
 [MetaJSON]
 [MetaProvides::Package]
 inherit_version = 0
