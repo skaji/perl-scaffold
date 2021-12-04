@@ -147,6 +147,7 @@ inherit_missing = 0
 [PruneFiles]
 filename = dist.ini
 filename = cpm.yml
+match = ^(xt|author|maint)/
 [ReadmeAnyFromPod]
 type = markdown
 filename = README.md
@@ -171,6 +172,8 @@ allow_dirty_match = \.pm$
 tag_format = %v
 tag_message =
 [Git::Push]
+[GitHubREADME::Badge]
+badges = github_actions/test
 
 @@ Module.pm
 package <%= $module %>;
