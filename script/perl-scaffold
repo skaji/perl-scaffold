@@ -1,34 +1,43 @@
 #!perl
-use 5.34.0;
-use warnings;
-use experimental 'signatures';
+use Mojo::Base -signatures;
 
 use Dist::Zilla::App;
 use Mojo::File;
 use Mojo::Loader;
-use Mojo::Template;
-use Time::Piece ();
+
+package Template {
+    use Mojo::Base -base, -signatures;
+
+    use Mojo::File;
+    use Mojo::Template;
+
+    has argv => undef;
+    has data => undef;
+    has tmpl => sub ($self, @) { Mojo::Template->new(vars => 1) };
+
+    sub render ($self, $source, $target) {
+        my $file = Mojo::File->new($target);
+        $file->dirname->make_path if !-d $file->dirname;
+        $file->spurt($self->tmpl->render($self->data->{$source}, $self->argv));
+    }
+}
 
 sub capture (@cmd) { qx/@cmd/ =~ s/\n\z//r }
 
 my $module = shift;
 die "Usage: $0 MODULE\n" if !$module or $module =~ /^(-h|--help)$/n;
 $module =~ s/(::|-)/::/g;
+
 my $dist = $module =~ s/::/-/gr;
 my $author = capture qw(git config --get user.name);
 my $email = capture qw(git config --get user.email);
 my $github_user = capture qw(git config --get github.user) or die "missing 'git config --get github.user'\n";
-my $year = Time::Piece->new->year;
+my $year = (localtime)[5] + 1900;
 
-my %ARGV = (module => $module, dist => $dist, author => $author, email => $email, year => $year);
-my $DATA = Mojo::Loader::data_section __PACKAGE__;
-my $TMPL = Mojo::Template->new(vars => 1);
-
-sub render ($source, $target) {
-    my $file = Mojo::File->new($target);
-    $file->dirname->make_path if !-d $file->dirname;
-    $file->spurt($TMPL->render($DATA->{$source}, \%ARGV));
-}
+my $tmpl = Template->new(
+    argv => { module => $module, dist => $dist, author => $author, email => $email, year => $year },
+    data => (Mojo::Loader::data_section __PACKAGE__),
+);
 
 my $dir = Mojo::File->new($dist);
 die "Already exist $dir\n" if -e $dir;
@@ -42,13 +51,13 @@ my $libfile = Mojo::File->new("lib", @part, "$last.pm");
 
 chdir $dir;
 
-render "Module.pm" => $libfile;
-render ".github/workflows/test.yml" => ".github/workflows/test.yml";
-render ".gitignore" => ".gitignore";
-render "Changes" => "Changes";
-render "cpm.yml" => "cpm.yml";
-render "dist.ini" => "dist.ini";
-render "t/00_use.t" => "t/00_use.t";
+$tmpl->render("Module.pm" => $libfile);
+$tmpl->render(".github/workflows/test.yml" => ".github/workflows/test.yml");
+$tmpl->render(".gitignore" => ".gitignore");
+$tmpl->render("Changes" => "Changes");
+$tmpl->render("cpm.yml" => "cpm.yml");
+$tmpl->render("dist.ini" => "dist.ini");
+$tmpl->render("t/00_use.t" => "t/00_use.t");
 
 system "git", "init", "-q", ".";
 system "git", "add", ".";

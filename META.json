@@ -29,7 +29,7 @@
         "Dist::Zilla::Plugin::ReversionOnRelease": 0,
         "Dist::Zilla::Plugin::StaticInstall": 0,
         "Dist::Zilla::Plugin::VersionFromMainModule": 0,
-        "Mojolicious": "9.19",
+        "Mojolicious": "9.22",
         "perl": "v5.34.0"
       }
     }
