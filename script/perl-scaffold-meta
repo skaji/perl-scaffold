@@ -1,0 +1,22 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+
+print <<'EOF';
+{
+  "dynamic_config": 0,
+  "meta-spec": {
+    "version": 2
+  },
+  "name": "_",
+  "prereqs": {
+    "runtime": {
+      "requires": {
+        "perl": "5.8.1"
+      }
+    }
+  },
+  "version": "1",
+  "x_static_install": 1
+}
+EOF
