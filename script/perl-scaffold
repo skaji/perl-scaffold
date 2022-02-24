@@ -24,10 +24,9 @@ package Template {
 
 sub capture (@cmd) { qx/@cmd/ =~ s/\n\z//r }
 
-my $module = shift;
-die "Usage: $0 MODULE\n" if !$module or $module =~ /^(-h|--help)$/n;
-$module =~ s/(::|-)/::/g;
+die "Usage: $0 MODULE\n" if !@ARGV or $ARGV[0] =~ /^(-h|--help)$/n;
 
+my $module = $ARGV[0] =~ s/(::|-)/::/gr;
 my $dist = $module =~ s/::/-/gr;
 my $author = capture qw(git config --get user.name);
 my $email = capture qw(git config --get user.email);
@@ -147,6 +146,7 @@ exclude_filename = LICENSE
 issues = 1
 [License]
 [LicenseFromModule]
+override_author = 1
 [MetaJSON]
 [MetaProvides::Package]
 inherit_version = 0
