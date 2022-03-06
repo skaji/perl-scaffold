@@ -182,7 +182,7 @@ tag_format = %v
 tag_message =
 [Git::Push]
 [GitHubREADME::Badge]
-badges = github_actions/test
+badges = github_actions/test.yml
 
 @@ Module.pm
 package <%= $module %>;
