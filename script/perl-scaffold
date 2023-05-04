@@ -75,7 +75,6 @@ Revision history for <%= $dist %>
 
 @@ t/00_use.t
 use strict;
-use warnings;
 use Test::More tests => 1;
 use <%= $module %>;
 pass "happy hacking!";
@@ -88,7 +87,7 @@ pass "happy hacking!";
 prereqs:
   runtime:
     requires:
-      perl: { version: '5.008001' }
+      perl: { version: 'v5.16' }
 
 @@ .github/workflows/test.yml
 name: test
@@ -107,7 +106,7 @@ jobs:
     strategy:
       matrix:
         perl-version:
-          - '5.8-buster'
+          - '5.16-buster'
           - 'latest'
     container:
       image: perl:${{ matrix.perl-version }}
@@ -185,12 +184,9 @@ tag_message =
 [Git::Push]
 
 @@ Module.pm
-package <%= $module %>;
-use strict;
+package <%= $module %> v0.0.1;
+use v5.16;
 use warnings;
-
-our $VERSION = '0.001';
-
 
 1;
 <%# %>__END__
