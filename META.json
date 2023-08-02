@@ -30,7 +30,7 @@
         "Dist::Zilla::Plugin::StaticInstall": 0,
         "Dist::Zilla::Plugin::VersionFromMainModule": 0,
         "Mojolicious": "9.22",
-        "perl": "v5.34.0"
+        "perl": "v5.38.0"
       }
     }
   }
