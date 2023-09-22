@@ -18,7 +18,7 @@ package Template {
     sub render ($self, $source, $target) {
         my $file = Mojo::File->new($target);
         $file->dirname->make_path if !-d $file->dirname;
-        $file->spurt($self->tmpl->render($self->data->{$source}, $self->argv));
+        $file->spew($self->tmpl->render($self->data->{$source}, $self->argv));
     }
 }
 
