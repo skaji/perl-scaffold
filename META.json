@@ -9,7 +9,6 @@
   "prereqs": {
     "runtime": {
       "requires": {
-        "Archive::Tar::Wrapper": "0.38",
         "Dist::Zilla": "6.030",
         "Dist::Zilla::Plugin::CheckChangesHasContent": "0",
         "Dist::Zilla::Plugin::CopyFilesFromBuild": "0",
@@ -27,7 +26,7 @@
         "Dist::Zilla::Plugin::StaticInstall": "0",
         "Dist::Zilla::Plugin::VersionFromMainModule": "0",
         "Mojolicious": "9.34",
-        "perl": "v5.38"
+        "perl": "v5.40"
       }
     }
   }
