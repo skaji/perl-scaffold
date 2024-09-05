@@ -1,5 +1,5 @@
 #!perl
-use Mojo::Base -signatures;
+use v5.40;
 
 use Dist::Zilla::App;
 use Mojo::File;
@@ -161,7 +161,6 @@ match = ^(xt|author|maint|example|eg)/
 [GitHubREADME::Badge]
 badges = github_actions/test.yml
 [Prereqs::From::cpmfile]
-phases = configure,build,runtime,test
 [ModuleBuildTiny]
 [MetaJSON]
 [StaticInstall]
