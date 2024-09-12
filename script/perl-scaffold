@@ -180,7 +180,7 @@ allow_dirty = META.json
 allow_dirty_match = \.pm$
 [Git::Tag]
 tag_format = %v
-tag_message =
+tag_message = %v
 [Git::Push]
 
 @@ Module.pm
