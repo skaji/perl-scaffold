@@ -153,7 +153,6 @@ my @config = (
         'License' => [],
 
         'CheckChangesHasContent' => [],
-        'TestRelease' => [],
         'ConfirmRelease' => [],
         'UploadToCPAN' => [],
         'CopyFilesFromRelease' => [ match => '\.pm$' ],
