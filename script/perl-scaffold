@@ -133,6 +133,7 @@ my @config = (
     name => '<%= $dist %>',
 
     [
+        'ExecDir' => [ dir => 'script' ],
         'Git::GatherDir' => [ exclude_filename => 'META.json', exclude_filename => 'LICENSE' ],
         'CopyFilesFromBuild' => [ copy => 'META.json', copy => 'LICENSE' ],
         'VersionFromMainModule' => [],
