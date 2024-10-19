@@ -73,7 +73,7 @@ Revision history for <%= $dist %>
   - Initial version
 
 @@ t/00_use.t
-use strict;
+use v5.20;
 use Test::More tests => 1;
 use <%= $module %>;
 pass "happy hacking!";
@@ -99,7 +99,6 @@ jobs:
     strategy:
       matrix:
         perl-version:
-          - '5.20-buster'
           - 'latest'
     container:
       image: perl:${{ matrix.perl-version }}
@@ -108,14 +107,6 @@ jobs:
       - run: perl -V
       - name: Install Dependencies
         run: curl -fsSL --compressed https://raw.githubusercontent.com/skaji/cpm/main/cpm | perl - install -g --with-develop --with-recommends --show-build-log-on-failure
-      - run: prove -l t
-  windows:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: perl -V
-      - name: Install Dependencies
-        run: curl -fsSL https://raw.githubusercontent.com/skaji/cpm/main/cpm | perl - install -g --with-develop --with-recommends --show-build-log-on-failure
       - run: prove -l t
 
 @@ dist.pl
