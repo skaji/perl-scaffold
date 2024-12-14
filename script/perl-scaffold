@@ -38,7 +38,7 @@ my $tmpl = Template->new(
     data => (Mojo::Loader::data_section __PACKAGE__),
 );
 
-my $dir = Mojo::File->new($dist);
+my $dir = Mojo::File->new("perl-$dist");
 die "Already exist $dir\n" if -e $dir;
 
 warn "Creating ./$dir\n";
@@ -59,7 +59,7 @@ $tmpl->render("t/00_use.t" => "t/00_use.t");
 
 system "git", "init", "-q", ".";
 system "git", "add", ".";
-system "git", "remote", "add", "origin", "ssh://git\@github.com/$github_user/$dist.git";
+system "git", "remote", "add", "origin", "ssh://git\@github.com/$github_user/perl-$dist.git";
 { local @ARGV = ("build", "--no-tgz"); Dist::Zilla::App->new->run }
 system "git", "add", ".";
 system "git", "clean", "-xfd";
