@@ -63,7 +63,7 @@ system "git", "add", ".";
 system "git", "remote", "add", "origin", "ssh://git\@github.com/$github_user/perl-$dist.git";
 { local @ARGV = ("build", "--no-tgz"); Dist::Zilla::App->new->run }
 system "git", "add", ".";
-system "git", "clean", "-xfd";
+system "git", "clean", "-xfdq";
 
 __DATA__
 
