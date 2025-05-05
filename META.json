@@ -9,7 +9,7 @@
   "prereqs": {
     "runtime": {
       "requires": {
-        "Dist::Zilla": "6.032",
+        "Dist::Zilla": "6.033",
         "Dist::Zilla::Plugin::CheckChangesHasContent": "0",
         "Dist::Zilla::Plugin::CopyFilesFromBuild": "0",
         "Dist::Zilla::Plugin::CopyFilesFromRelease": "0",
@@ -27,6 +27,7 @@
         "Dist::Zilla::Plugin::StaticInstall": "0",
         "Dist::Zilla::Plugin::VersionFromMainModule": "0",
         "Mojolicious": "9.39",
+        "Software::License": "0.104007",
         "perl": "v5.40"
       }
     }

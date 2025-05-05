@@ -5,6 +5,7 @@ use Cpanel::JSON::XS (); # force to use Cpanel::JSON::XS to generate META.json
 use Dist::Zilla::App;
 use Mojo::File;
 use Mojo::Loader;
+use Software::License::Perl_5;
 
 package Template {
     use Mojo::Base -base, -signatures;
@@ -57,6 +58,8 @@ $tmpl->render(".gitignore" => ".gitignore");
 $tmpl->render("Changes" => "Changes");
 $tmpl->render("dist.pl" => "dist.pl");
 $tmpl->render("t/00_use.t" => "t/00_use.t");
+my $license = Software::License::Perl_5->new({ holder => "$author <$email>", year => $year });
+Mojo::File->new("LICENSE")->spew($license->fulltext);
 
 system "git", "init", "-q", ".";
 system "git", "add", ".";
@@ -123,10 +126,9 @@ my @prereq = (
 
 my @plugin = (
     'ExecDir' => [ dir => 'script' ],
-    'Git::GatherDir' => [ exclude_filename => 'META.json', exclude_filename => 'LICENSE' ],
-    'CopyFilesFromBuild' => [ copy => 'META.json', copy => 'LICENSE' ],
+    'Git::GatherDir' => [ exclude_filename => 'META.json' ],
+    'CopyFilesFromBuild' => [ copy => 'META.json' ],
     'VersionFromMainModule' => [],
-    'LicenseFromModule' => [ override_author => 1 ],
     'ReversionOnRelease' => [ prompt => 1 ],
     'NextRelease' => [ format => '%v  %{yyyy-MM-dd HH:mm:ss VVV}d%{ (TRIAL RELEASE)}T' ],
     'Git::Check' => [ allow_dirty => 'Changes', allow_dirty => 'META.json' ],
@@ -139,7 +141,6 @@ my @plugin = (
     'MetaJSON' => [],
     'Metadata' => [ x_static_install => 1 ],
     'Git::Contributors' => [],
-    'License' => [],
 
     'CheckChangesHasContent' => [],
     'ConfirmRelease' => [],
