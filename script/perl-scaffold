@@ -24,7 +24,7 @@ package Template {
     }
 }
 
-sub capture (@cmd) { qx/@cmd/ =~ s/\n\z//r }
+my sub capture (@cmd) { qx/@cmd/ =~ s/\n\z//r }
 
 die "Usage: $0 MODULE\n" if !@ARGV or $ARGV[0] =~ /^(-h|--help)$/n;
 
@@ -39,6 +39,7 @@ my $tmpl = Template->new(
     argv => { module => $module, dist => $dist, author => $author, email => $email, year => $year },
     data => (Mojo::Loader::data_section __PACKAGE__),
 );
+my $license = Software::License::Perl_5->new({ holder => "$author <$email>", year => $year });
 
 my $dir = Mojo::File->new("perl-$dist");
 die "Already exist $dir\n" if -e $dir;
@@ -58,7 +59,6 @@ $tmpl->render(".gitignore" => ".gitignore");
 $tmpl->render("Changes" => "Changes");
 $tmpl->render("dist.pl" => "dist.pl");
 $tmpl->render("t/00_use.t" => "t/00_use.t");
-my $license = Software::License::Perl_5->new({ holder => "$author <$email>", year => $year });
 Mojo::File->new("LICENSE")->spew($license->fulltext);
 
 system "git", "init", "-q", ".";
