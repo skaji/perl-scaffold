@@ -26,9 +26,9 @@
         "Dist::Zilla::Plugin::ReversionOnRelease": "0",
         "Dist::Zilla::Plugin::StaticInstall": "0",
         "Dist::Zilla::Plugin::VersionFromMainModule": "0",
-        "Mojolicious": "9.39",
+        "Mojolicious": "9.41",
         "Software::License": "0.104007",
-        "perl": "v5.40"
+        "perl": "v5.42"
       }
     }
   }

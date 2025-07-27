@@ -1,5 +1,5 @@
 #!perl
-use v5.40;
+use v5.42;
 
 use Cpanel::JSON::XS (); # force to use Cpanel::JSON::XS to generate META.json
 use Dist::Zilla::App;
