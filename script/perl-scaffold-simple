@@ -1,0 +1,123 @@
+#!perl
+use v5.42;
+use utf8;
+
+use Cpanel::JSON::XS ();
+use Software::License::Perl_5;
+use File::Path qw(make_path);
+
+my sub run (@cmd) { warn "---> @cmd\n"; 0 == system @cmd or die }
+my sub capture (@cmd) { qx/@cmd/ =~ s/\n\z//r }
+my sub write_file ($file, $content) { open my $fh, ">:utf8", $file or die; print {$fh} $content }
+
+die "Usage: $0 MODULE\n" if !@ARGV or $ARGV[0] =~ /^(-h|--help)$/n;
+
+my $module = $ARGV[0] =~ s/(::|-)/::/gr;
+my $dist = $module =~ s/::/-/gr;
+my $author = capture qw(git config --get user.name);
+my $email = capture qw(git config --get user.email);
+my $github_user = capture qw(git config --get github.user) or die "missing 'git config --get github.user'\n";
+my $year = (localtime)[5] + 1900;
+
+die "already exists perl-$dist\n" if -e "perl-$dist";
+warn "---> create perl-$dist\n";
+make_path "perl-$dist";
+chdir "perl-$dist";
+
+my @part = split /-/, $dist;
+my $last = pop @part;
+my $lib_dir = join "/", "lib", @part;
+my $lib_file = join "/", "lib", @part, "$last.pm";
+
+for my $dir ($lib_dir, "script", "t", ".github/workflows") {
+    make_path $dir;
+}
+
+write_file $lib_file, <<"EOF";
+package $module v0.0.1;
+use v5.42;
+EOF
+
+write_file "t/00_test.t", <<"EOF";
+use v5.42;
+use Test2::V0;
+use $module;
+
+pass "happy hacking!";
+done_testing;
+EOF
+
+write_file ".github/workflows/test.yml", <<'EOF';
+name: test
+
+on:
+  push:
+    branches:
+      - '*'
+    tags-ignore:
+      - '*'
+  pull_request:
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        perl-version:
+          - 'latest'
+    container:
+      image: perl:${{ matrix.perl-version }}
+    steps:
+      - uses: actions/checkout@v5
+      - run: perl -V
+      - name: Install Dependencies
+        run: curl -fsSL --compressed https://raw.githubusercontent.com/skaji/cpm/main/cpm | perl - install -g --with-develop --with-recommends --show-build-log-on-failure
+      - run: prove -l t
+EOF
+
+write_file "README.md", <<"EOF";
+# perl-$dist
+
+# Installation
+
+```
+❯ cpm install -g https://github.com/$github_user/perl-$dist.git
+```
+
+# License
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+EOF
+
+my $license = Software::License::Perl_5->new({ holder => "$author <$email>", year => $year });
+write_file "LICENSE", $license->fulltext;
+
+my $meta = {
+    dynamic_config => 0,
+    "meta-spec" => {
+        version => 2,
+    },
+    name => $dist,
+    prereqs => {
+        configure => {
+            requires => {
+                perl => "v5.42",
+            },
+        },
+        runtime => {
+            requires => {
+                perl => "v5.42",
+            },
+        }
+    },
+    version => "v0.0.1",
+    x_static_install => 1,
+};
+
+my $json = Cpanel::JSON::XS->new->canonical->pretty->space_before(0)->indent_length(2);
+write_file "META.json", $json->encode($meta);
+
+run "git", "init", "-q", ".";
+run "git", "add", ".";
+run "git", "remote", "add", "origin", "git\@github.com:$github_user/perl-$dist.git";
